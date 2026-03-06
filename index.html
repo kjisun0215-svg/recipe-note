@@ -2,15 +2,15 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>나만의 레시피 노트</title>
+<title>나만의 AI 레시피 노트</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>🍳 나만의 레시피 노트</h1>
+<h1>🍳 나만의 AI 레시피 노트</h1>
 
-<input id="search" placeholder="레시피 검색">
+<input id="search" placeholder="레시피 검색" oninput="searchRecipe()">
 
 <div class="form">
 
@@ -37,27 +37,24 @@
 
 <textarea id="content" placeholder="레시피 설명"></textarea>
 
-<input type="file" id="image">
-
-<button onclick="saveRecipe()">저장</button>
+<button onclick="saveRecipe()">레시피 저장</button>
 
 </div>
 
 <hr>
 
-<h2>🤖 AI 레시피 생성</h2>
+<h2>🔗 레시피 URL 자동 정리</h2>
 
-<input id="aiIngredients" placeholder="재료 입력 (예: 계란, 우유)">
-<button onclick="generateRecipe()">AI 레시피 만들기</button>
+<input id="recipeUrl" placeholder="블로그 레시피 URL 붙여넣기">
 
-<div id="aiResult"></div>
+<button onclick="extractRecipe()">AI 레시피 추출</button>
+
+<pre id="urlResult"></pre>
 
 <hr>
 
-<h2>⭐ 즐겨찾기</h2>
-<div id="favoriteList"></div>
+<h2>📖 내 레시피</h2>
 
-<h2>📖 레시피 목록</h2>
 <div id="recipeList"></div>
 
 <script src="script.js"></script>
