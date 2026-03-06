@@ -1,116 +1,50 @@
 let recipes = JSON.parse(localStorage.getItem("recipes")) || []
-let editIndex=null
 
 function saveRecipe(){
 
-let title=titleInput.value
-let content=contentInput.value
-let category=category.value
-let tags=tagsInput.value.split(",")
-let time=timeInput.value
-let level=levelSelect.value
-let steps=stepsInput.value.split("\n")
+const recipe = {
 
-let file=image.files[0]
-
-if(!title) return
-
-if(file){
-
-let reader=new FileReader()
-
-reader.onload=function(e){
-
-storeRecipe(e.target.result)
+title: document.getElementById("title").value,
+category: document.getElementById("category").value,
+tags: document.getElementById("tags").value,
+time: document.getElementById("time").value,
+level: document.getElementById("level").value,
+steps: document.getElementById("steps").value,
+content: document.getElementById("content").value
 
 }
-
-reader.readAsDataURL(file)
-
-}else{
-
-storeRecipe(null)
-
-}
-
-function storeRecipe(img){
-
-let recipe={
-title,
-content,
-category,
-tags,
-time,
-level,
-steps,
-image:img,
-favorite:false
-}
-
-if(editIndex!==null){
-
-recipes[editIndex]=recipe
-editIndex=null
-
-}else{
 
 recipes.push(recipe)
 
-}
+localStorage.setItem("recipes", JSON.stringify(recipes))
 
-localStorage.setItem("recipes",JSON.stringify(recipes))
-
-render()
-clearForm()
+renderRecipes()
 
 }
 
-}
+function renderRecipes(){
 
-function render(){
+const list = document.getElementById("recipeList")
 
-let list=document.getElementById("recipeList")
-let fav=document.getElementById("favoriteList")
-let search=document.getElementById("search").value
+list.innerHTML = ""
 
-list.innerHTML=""
-fav.innerHTML=""
+recipes.forEach((r,i)=>{
 
-recipes
-.filter(r=>r.title.includes(search))
-.forEach((r,i)=>{
-
-let div=document.createElement("div")
+const div = document.createElement("div")
 div.className="recipe"
 
-div.innerHTML=`
+div.innerHTML = `
 <h3>${r.title}</h3>
-<p>${r.category} | ${r.time} | 난이도:${r.level}</p>
+<p>카테고리: ${r.category}</p>
+<p>태그: ${r.tags}</p>
+<p>시간: ${r.time}</p>
+<p>난이도: ${r.level}</p>
 <p>${r.content}</p>
-
-<ol>
-${r.steps.map(s=>`<li>${s}</li>`).join("")}
-</ol>
-
-${r.image ? `<img src="${r.image}">`:""}
-
-<button onclick="editRecipe(${i})">수정</button>
+<pre>${r.steps}</pre>
 <button onclick="deleteRecipe(${i})">삭제</button>
-<button onclick="toggleFavorite(${i})">
-${r.favorite ? "★":"☆"}
-</button>
 `
 
-if(r.favorite){
-
-div.classList.add("favorite")
-fav.appendChild(div)
-
-}else{
-
 list.appendChild(div)
-
-}
 
 })
 
@@ -120,45 +54,96 @@ function deleteRecipe(i){
 
 recipes.splice(i,1)
 
-localStorage.setItem("recipes",JSON.stringify(recipes))
+localStorage.setItem("recipes", JSON.stringify(recipes))
 
-render()
-
-}
-
-function toggleFavorite(i){
-
-recipes[i].favorite=!recipes[i].favorite
-
-localStorage.setItem("recipes",JSON.stringify(recipes))
-
-render()
+renderRecipes()
 
 }
 
-function editRecipe(i){
+function searchRecipe(){
 
-let r=recipes[i]
+const keyword = document.getElementById("search").value.toLowerCase()
 
-titleInput.value=r.title
-contentInput.value=r.content
-tagsInput.value=r.tags.join(",")
-timeInput.value=r.time
-stepsInput.value=r.steps.join("\n")
+const filtered = recipes.filter(r =>
+r.title.toLowerCase().includes(keyword) ||
+r.tags.toLowerCase().includes(keyword)
+)
 
-editIndex=i
+const list = document.getElementById("recipeList")
+
+list.innerHTML=""
+
+filtered.forEach(r=>{
+
+const div=document.createElement("div")
+
+div.className="recipe"
+
+div.innerHTML=`
+<h3>${r.title}</h3>
+<p>${r.content}</p>
+`
+
+list.appendChild(div)
+
+})
 
 }
 
-function clearForm(){
+async function extractRecipe(){
 
-titleInput.value=""
-contentInput.value=""
-tagsInput.value=""
-timeInput.value=""
-stepsInput.value=""
+const url=document.getElementById("recipeUrl").value
+
+const proxy="https://api.allorigins.win/raw?url="
+
+try{
+
+const page=await fetch(proxy+encodeURIComponent(url))
+const html=await page.text()
+
+const ai=await fetch("https://api.openai.com/v1/chat/completions",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer YOUR_OPENAI_KEY"
+},
+
+body:JSON.stringify({
+
+model:"gpt-4o-mini",
+
+messages:[
+{
+role:"system",
+content:"웹페이지에서 요리 레시피를 찾아 재료, 조리순서, 요약으로 정리해줘."
+},
+{
+role:"user",
+content:html.substring(0,7000)
+}
+]
+
+})
+
+})
+
+const data=await ai.json()
+
+document.getElementById("urlResult").innerText =
+data.choices[0].message.content
+
+}catch(e){
+
+document.getElementById("urlResult").innerText =
+"레시피를 가져오지 못했습니다."
 
 }
+
+}
+
+renderRecipes()
 
 document.getElementById("search").addEventListener("input",render)
 
