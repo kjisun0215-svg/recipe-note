@@ -1,13 +1,238 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나만의 레시피 노트 🍳</title>
+  <link rel="stylesheet" href="style.css">
 <meta charset="UTF-8">
 <title>나만의 AI 레시피 노트</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
+
+  <!-- 사이드바 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">🍳</span>
+        <span class="logo-text">레시피 노트</span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose">✕</button>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="recipes" onclick="switchTab('recipes', this)">
+        <span class="nav-icon">📖</span> 레시피 목록
+      </button>
+      <button class="nav-item" data-tab="add" onclick="switchTab('add', this)">
+        <span class="nav-icon">✏️</span> 레시피 추가
+      </button>
+      <button class="nav-item" data-tab="ai" onclick="switchTab('ai', this)">
+        <span class="nav-icon">🤖</span> AI 레시피
+      </button>
+      <button class="nav-item" data-tab="url" onclick="switchTab('url', this)">
+        <span class="nav-icon">🔗</span> URL 가져오기
+      </button>
+      <button class="nav-item" data-tab="favorites" onclick="switchTab('favorites', this)">
+        <span class="nav-icon">⭐</span> 즐겨찾기
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="recipe-count" id="recipeCount">레시피 0개</div>
+    </div>
+  </aside>
+
+  <!-- 오버레이 -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- 메인 -->
+  <main class="main">
+
+    <!-- 헤더 -->
+    <header class="header">
+      <button class="menu-btn" id="menuBtn" onclick="openSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="header-search">
+        <span class="search-icon">🔍</span>
+        <input id="search" class="search-input" placeholder="레시피 검색..." oninput="render()">
+      </div>
+      <button class="add-btn" onclick="switchTab('add')">
+        <span>+</span> 새 레시피
+      </button>
+    </header>
+
+    <!-- 탭 콘텐츠 -->
+    <div class="content">
+
+      <!-- 레시피 목록 탭 -->
+      <section class="tab-pane active" id="tab-recipes">
+        <div class="section-header">
+          <h2 class="section-title">내 레시피</h2>
+          <div class="filter-row">
+            <button class="filter-btn active" onclick="filterCategory('전체', this)">전체</button>
+            <button class="filter-btn" onclick="filterCategory('한식', this)">🍚 한식</button>
+            <button class="filter-btn" onclick="filterCategory('양식', this)">🍝 양식</button>
+            <button class="filter-btn" onclick="filterCategory('디저트', this)">🧁 디저트</button>
+            <button class="filter-btn" onclick="filterCategory('기타', this)">🍽️ 기타</button>
+          </div>
+        </div>
+        <div class="recipe-grid" id="recipeList">
+          <div class="empty-state">
+            <div class="empty-icon">🍽️</div>
+            <p>아직 레시피가 없어요</p>
+            <small>새 레시피를 추가하거나 AI로 만들어보세요!</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- 레시피 추가 탭 -->
+      <section class="tab-pane" id="tab-add">
+        <div class="section-header">
+          <h2 class="section-title" id="formTitle">새 레시피 추가</h2>
+        </div>
+        <div class="form-card">
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label class="form-label">레시피 이름 *</label>
+              <input id="title" class="form-input" placeholder="예: 된장찌개, 파스타 등">
+            </div>
+            <div class="form-group">
+              <label class="form-label">카테고리</label>
+              <select id="category" class="form-input form-select">
+                <option value="한식">🍚 한식</option>
+                <option value="양식">🍝 양식</option>
+                <option value="디저트">🧁 디저트</option>
+                <option value="기타">🍽️ 기타</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">요리 시간</label>
+              <input id="time" class="form-input" placeholder="예: 30분">
+            </div>
+            <div class="form-group">
+              <label class="form-label">난이도</label>
+              <select id="level" class="form-input form-select">
+                <option value="쉬움">😊 쉬움</option>
+                <option value="보통">😐 보통</option>
+                <option value="어려움">😤 어려움</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">태그</label>
+              <input id="tags" class="form-input" placeholder="예: 간단요리, 다이어트 (쉼표 구분)">
+            </div>
+            <div class="form-group span-2">
+              <label class="form-label">재료</label>
+              <textarea id="ingredients" class="form-input form-textarea" placeholder="재료를 줄바꿈으로 구분해 입력하세요&#10;예: 계란 2개&#10;우유 200ml"></textarea>
+            </div>
+            <div class="form-group span-2">
+              <label class="form-label">조리 순서</label>
+              <textarea id="steps" class="form-input form-textarea" placeholder="조리 순서를 줄바꿈으로 구분해 입력하세요&#10;예: 1. 물을 끓인다&#10;2. 재료를 넣는다"></textarea>
+            </div>
+            <div class="form-group span-2">
+              <label class="form-label">설명 / 팁</label>
+              <textarea id="content" class="form-input form-textarea short" placeholder="레시피에 대한 설명이나 팁을 입력하세요"></textarea>
+            </div>
+            <div class="form-group span-2">
+              <label class="form-label">이미지</label>
+              <div class="file-upload" id="fileUploadArea" onclick="document.getElementById('image').click()">
+                <input type="file" id="image" accept="image/*" onchange="previewImage(this)" style="display:none">
+                <div class="file-upload-content" id="fileUploadContent">
+                  <span class="upload-icon">📷</span>
+                  <p>클릭하여 이미지 업로드</p>
+                  <small>PNG, JPG, WEBP 지원</small>
+                </div>
+                <img id="imagePreview" class="image-preview" style="display:none">
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-secondary" onclick="clearForm()">초기화</button>
+            <button class="btn-primary" onclick="saveRecipe()">
+              <span id="saveLabel">💾 저장하기</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI 레시피 탭 -->
+      <section class="tab-pane" id="tab-ai">
+        <div class="section-header">
+          <h2 class="section-title">🤖 AI 레시피 생성</h2>
+          <p class="section-desc">재료를 입력하면 AI가 레시피를 만들어드려요</p>
+        </div>
+        <div class="ai-card">
+          <div class="ai-input-area">
+            <label class="form-label">재료 입력</label>
+            <div class="ai-input-row">
+              <input id="aiIngredients" class="form-input" placeholder="예: 계란, 우유, 버터, 밀가루">
+              <button class="btn-ai" onclick="generateRecipe()" id="aiBtn">
+                <span id="aiBtnText">✨ 생성하기</span>
+              </button>
+            </div>
+          </div>
+          <div id="aiResult" class="ai-result" style="display:none"></div>
+        </div>
+      </section>
+
+      <!-- URL 가져오기 탭 -->
+      <section class="tab-pane" id="tab-url">
+        <div class="section-header">
+          <h2 class="section-title">🔗 URL로 레시피 가져오기</h2>
+          <p class="section-desc">요리 레시피가 담긴 링크를 붙여넣으면 자동으로 정리해드려요</p>
+        </div>
+        <div class="url-card">
+          <div class="url-input-area">
+            <label class="form-label">레시피 URL</label>
+            <div class="url-input-row">
+              <input id="recipeUrl" class="form-input" placeholder="https://...">
+              <button class="btn-url" onclick="importFromUrl()" id="urlBtn">
+                <span id="urlBtnText">📥 가져오기</span>
+              </button>
+            </div>
+            <p class="url-hint">💡 유튜브, 블로그, 요리 사이트 등 다양한 링크를 지원해요</p>
+          </div>
+          <div id="urlResult" class="url-result" style="display:none"></div>
+        </div>
+      </section>
+
+      <!-- 즐겨찾기 탭 -->
+      <section class="tab-pane" id="tab-favorites">
+        <div class="section-header">
+          <h2 class="section-title">⭐ 즐겨찾기</h2>
+        </div>
+        <div class="recipe-grid" id="favoriteList">
+          <div class="empty-state">
+            <div class="empty-icon">⭐</div>
+            <p>즐겨찾기한 레시피가 없어요</p>
+            <small>레시피 카드의 ⭐ 버튼을 눌러 추가하세요</small>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 레시피 상세 모달 -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-content" id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // API 설정 주입
+    window.__GENSPARK_API_KEY__ = 'ryxOk9ztVPwl0BmF2aVmJ6SxdButTyd7';
+  </script>
+  <script src="script.js"></script>
+=======
 <h1>🍳 나만의 AI 레시피 노트</h1>
 
 <input id="search" placeholder="레시피 검색" oninput="searchRecipe()">
@@ -59,5 +284,6 @@
 
 <script src="script.js"></script>
 
+>>>>>>> main
 </body>
 </html>
