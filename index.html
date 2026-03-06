@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>나만의 레시피 노트</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>🍳 나만의 레시피 노트</h1>
+
+<input id="search" placeholder="레시피 검색">
+
+<div class="form">
+
+<input id="title" placeholder="레시피 이름">
+
+<select id="category">
+<option>한식</option>
+<option>양식</option>
+<option>디저트</option>
+<option>기타</option>
+</select>
+
+<input id="tags" placeholder="태그 (예: 간단요리, 다이어트)">
+
+<input id="time" placeholder="요리 시간 (예: 20분)">
+
+<select id="level">
+<option>쉬움</option>
+<option>보통</option>
+<option>어려움</option>
+</select>
+
+<textarea id="steps" placeholder="요리 순서 (줄바꿈으로 구분)"></textarea>
+
+<textarea id="content" placeholder="레시피 설명"></textarea>
+
+<input type="file" id="image">
+
+<button onclick="saveRecipe()">저장</button>
+
+</div>
+
+<hr>
+
+<h2>🤖 AI 레시피 생성</h2>
+
+<input id="aiIngredients" placeholder="재료 입력 (예: 계란, 우유)">
+<button onclick="generateRecipe()">AI 레시피 만들기</button>
+
+<div id="aiResult"></div>
+
+<hr>
+
+<h2>⭐ 즐겨찾기</h2>
+<div id="favoriteList"></div>
+
+<h2>📖 레시피 목록</h2>
+<div id="recipeList"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
