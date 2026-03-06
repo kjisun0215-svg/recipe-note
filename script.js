@@ -1,10 +1,10 @@
-
 /* ================================================
    나만의 레시피 노트 - script.js
    - 레시피 CRUD (localStorage)
    - AI 레시피 생성 (OpenAI API)
    - URL에서 레시피 자동 추출 (AI 파싱)
    - 카테고리 필터, 즐겨찾기, 검색
+================================================ */
 
 // ============================
 // 상태 & 설정
@@ -98,67 +98,6 @@ function switchTab(tabName, btnEl) {
     }
   }
 }
-=======
-let recipes = JSON.parse(localStorage.getItem("recipes")) || []
-
-function saveRecipe(){
-
-const recipe = {
-
-title: document.getElementById("title").value,
-category: document.getElementById("category").value,
-tags: document.getElementById("tags").value,
-time: document.getElementById("time").value,
-level: document.getElementById("level").value,
-steps: document.getElementById("steps").value,
-content: document.getElementById("content").value
-
-}
-
-recipes.push(recipe)
-
-localStorage.setItem("recipes", JSON.stringify(recipes))
-
-renderRecipes()
-
-}
-
-function renderRecipes(){
-
-const list = document.getElementById("recipeList")
-
-list.innerHTML = ""
-
-recipes.forEach((r,i)=>{
-
-const div = document.createElement("div")
-div.className="recipe"
-
-div.innerHTML = `
-<h3>${r.title}</h3>
-<p>카테고리: ${r.category}</p>
-<p>태그: ${r.tags}</p>
-<p>시간: ${r.time}</p>
-<p>난이도: ${r.level}</p>
-<p>${r.content}</p>
-<pre>${r.steps}</pre>
-<button onclick="deleteRecipe(${i})">삭제</button>
-`
-
-list.appendChild(div)
-
-})
-
-}
-
-function deleteRecipe(i){
-
-recipes.splice(i,1)
-
-localStorage.setItem("recipes", JSON.stringify(recipes))
-
-renderRecipes()
->>>>>>> main
 
 // ============================
 // 카테고리 필터
@@ -169,7 +108,6 @@ function filterCategory(cat, btnEl) {
   btnEl.classList.add('active');
   render();
 }
-
 
 // ============================
 // 레시피 렌더링
@@ -403,73 +341,7 @@ function previewImage(input) {
     };
     reader.readAsDataURL(input.files[0]);
   }
-=======
-function searchRecipe(){
-
-const keyword = document.getElementById("search").value.toLowerCase()
-
-const filtered = recipes.filter(r =>
-r.title.toLowerCase().includes(keyword) ||
-r.tags.toLowerCase().includes(keyword)
-)
-
-const list = document.getElementById("recipeList")
-
-list.innerHTML=""
-
-filtered.forEach(r=>{
-
-const div=document.createElement("div")
-
-div.className="recipe"
-
-div.innerHTML=`
-<h3>${r.title}</h3>
-<p>${r.content}</p>
-`
-
-list.appendChild(div)
-
-})
-
 }
-
-async function extractRecipe(){
-
-const url=document.getElementById("recipeUrl").value
-
-const proxy="https://api.allorigins.win/raw?url="
-
-try{
-
-const page=await fetch(proxy+encodeURIComponent(url))
-const html=await page.text()
-
-const ai=await fetch("https://api.openai.com/v1/chat/completions",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer YOUR_OPENAI_KEY"
-},
-
-body:JSON.stringify({
-
-model:"gpt-4o-mini",
-
-messages:[
-{
-role:"system",
-content:"웹페이지에서 요리 레시피를 찾아 재료, 조리순서, 요약으로 정리해줘."
-},
-{
-role:"user",
-content:html.substring(0,7000)
->>>>>>> main
-}
-]
-
 
 // ============================
 // AI 레시피 생성
@@ -751,29 +623,12 @@ function openModal(i) {
 
   overlay.classList.add('show');
   document.body.style.overflow = 'hidden';
-=======
-})
-
-})
-
-const data=await ai.json()
-
-document.getElementById("urlResult").innerText =
-data.choices[0].message.content
-
-}catch(e){
-
-document.getElementById("urlResult").innerText =
-"레시피를 가져오지 못했습니다."
-
->>>>>>> main
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('show');
   document.body.style.overflow = '';
 }
-
 
 // ============================
 // 토스트 알림
@@ -784,10 +639,6 @@ function showToast(msg) {
   toast.classList.add('show');
   setTimeout(function() { toast.classList.remove('show'); }, 2800);
 }
-renderRecipes()
-
-document.getElementById("search").addEventListener("input",render)
->>>>>>> main
 
 // ============================
 // 키보드 단축키
