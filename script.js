@@ -23,17 +23,26 @@ function saveToStorage() {
 }
 
 // ============================
-// Anthropic API 호출
+// AI API 호출 (Genspark 프록시)
 // ============================
+const API_BASE = 'https://www.genspark.ai/api/llm_proxy/v1';
+const API_KEY  = 'ryxOk9ztVPwl0BmF2aVmJ6SxdButTyd7';
+const MODEL    = 'gpt-4o';
+
 async function callClaude(messages, systemPrompt) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetch(API_BASE + '/chat/completions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + API_KEY,
+    },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: messages,
+      model: MODEL,
+      temperature: 0.7,
+      max_tokens: 2000,
+      messages: systemPrompt
+        ? [{ role: 'system', content: systemPrompt }, ...messages]
+        : messages,
     }),
   });
 
@@ -43,7 +52,7 @@ async function callClaude(messages, systemPrompt) {
   }
 
   const data = await response.json();
-  return data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+  return data.choices[0].message.content;
 }
 
 // ============================
