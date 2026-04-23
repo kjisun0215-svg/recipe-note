@@ -131,6 +131,13 @@
               <label class="form-label">설명 / 팁</label>
               <textarea id="content" class="form-input form-textarea short" placeholder="레시피에 대한 설명이나 팁을 입력하세요"></textarea>
             </div>
+
+            <!-- ✅ 추가: 참고 URL (유튜브 / 블로그) -->
+            <div class="form-group span-2">
+              <label class="form-label">참고 URL <span class="label-hint">유튜브 또는 블로그 링크 (선택)</span></label>
+              <input id="sourceUrl" class="form-input" placeholder="https://youtu.be/... 또는 블로그 URL">
+            </div>
+
             <div class="form-group span-2">
               <label class="form-label">이미지</label>
               <div class="file-upload" id="fileUploadArea" onclick="document.getElementById('image').click()">
@@ -163,7 +170,7 @@
           <div class="ai-input-area">
             <label class="form-label">재료 입력</label>
             <div class="ai-input-row">
-              <input id="aiIngredients" class="form-input" placeholder="예: 계란, 우유, 버터, 밀가루">
+              <input id="aiIngredients" class="form-input" placeholder="예: 계란, 우유, 버터, 밀가루" onkeydown="if(event.key==='Enter') generateRecipe()">
               <button class="btn-ai" onclick="generateRecipe()" id="aiBtn">
                 <span id="aiBtnText">✨ 생성하기</span>
               </button>
@@ -177,18 +184,22 @@
       <section class="tab-pane" id="tab-url">
         <div class="section-header">
           <h2 class="section-title">🔗 URL로 레시피 가져오기</h2>
-          <p class="section-desc">요리 레시피가 담긴 링크를 붙여넣으면 자동으로 정리해드려요</p>
+          <p class="section-desc">유튜브 영상이나 블로그 링크를 붙여넣으면 AI가 레시피를 분석해드려요</p>
         </div>
         <div class="url-card">
           <div class="url-input-area">
             <label class="form-label">레시피 URL</label>
             <div class="url-input-row">
-              <input id="recipeUrl" class="form-input" placeholder="https://...">
+              <input id="recipeUrl" class="form-input" placeholder="https://youtu.be/... 또는 블로그 URL" onkeydown="if(event.key==='Enter') importFromUrl()">
               <button class="btn-url" onclick="importFromUrl()" id="urlBtn">
                 <span id="urlBtnText">📥 가져오기</span>
               </button>
             </div>
-            <p class="url-hint">💡 유튜브, 블로그, 요리 사이트 등 다양한 링크를 지원해요</p>
+            <div class="url-type-badges">
+              <span class="url-badge youtube">▶ 유튜브</span>
+              <span class="url-badge blog">📝 블로그</span>
+              <span class="url-badge site">🌐 요리 사이트</span>
+            </div>
           </div>
           <div id="urlResult" class="url-result" style="display:none"></div>
         </div>
@@ -222,10 +233,6 @@
   <!-- 토스트 알림 -->
   <div class="toast" id="toast"></div>
 
-  <script>
-    // API 설정 주입
-    window.__GENSPARK_API_KEY__ = 'ryxOk9ztVPwl0BmF2aVmJ6SxdButTyd7';
-  </script>
   <script src="script.js"></script>
 </body>
 </html>
