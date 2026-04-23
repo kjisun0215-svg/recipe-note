@@ -25,7 +25,7 @@ function saveToStorage() {
 // ============================
 // AI API 호출 (Google Gemini - CORS 허용)
 // ============================
-const GEMINI_KEY = 'AIzaSyBLOt2Xyr5wSImKb7NkFyDeM11DMZvqVdQ';
+const GEMINI_KEY = 'AIzaSyAzpJKS18E4k6F-VWor7PUiZY8LIIeDvII';
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
 
 async function callClaude(messages, systemPrompt) {
