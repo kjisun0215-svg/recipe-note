@@ -23,22 +23,27 @@ function saveToStorage() {
 }
 
 // ============================
-// AI API 호출 (Google Gemini - CORS 허용)
+// AI API 호출 (OpenRouter - CORS 허용)
 // ============================
-const GEMINI_KEY = 'AIzaSyAzpJKS18E4k6F-VWor7PUiZY8LIIeDvII';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
+const OR_KEY = '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';
+const OR_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 async function callClaude(messages, systemPrompt) {
-  // Gemini 형식으로 변환
-  const prompt = (systemPrompt ? systemPrompt + '\n\n' : '') +
-    messages.map(m => m.content).join('\n');
-
-  const response = await fetch(GEMINI_URL, {
+  const response = await fetch(OR_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + OR_KEY,
+      'HTTP-Referer': 'https://kjisun0215-svg.github.io/recipe-note/',
+      'X-Title': 'Recipe Note',
+    },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 2000 },
+      model: 'meta-llama/llama-3.3-8b-instruct:free',
+      temperature: 0.7,
+      max_tokens: 2000,
+      messages: systemPrompt
+        ? [{ role: 'system', content: systemPrompt }, ...messages]
+        : messages,
     }),
   });
 
@@ -48,7 +53,7 @@ async function callClaude(messages, systemPrompt) {
   }
 
   const data = await response.json();
-  return data.candidates[0].content.parts[0].text;
+  return data.choices[0].message.content;
 }
 
 // ============================
