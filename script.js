@@ -23,26 +23,22 @@ function saveToStorage() {
 }
 
 // ============================
-// AI API 호출 (Genspark 프록시)
+// AI API 호출 (Google Gemini - CORS 허용)
 // ============================
-const API_BASE = 'https://www.genspark.ai/api/llm_proxy/v1';
-const API_KEY  = 'ryxOk9ztVPwl0BmF2aVmJ6SxdButTyd7';
-const MODEL    = 'gpt-4o';
+const GEMINI_KEY = 'AIzaSyBLOt2Xyr5wSImKb7NkFyDeM11DMZvqVdQ';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
 
 async function callClaude(messages, systemPrompt) {
-  const response = await fetch(API_BASE + '/chat/completions', {
+  // Gemini 형식으로 변환
+  const prompt = (systemPrompt ? systemPrompt + '\n\n' : '') +
+    messages.map(m => m.content).join('\n');
+
+  const response = await fetch(GEMINI_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + API_KEY,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: MODEL,
-      temperature: 0.7,
-      max_tokens: 2000,
-      messages: systemPrompt
-        ? [{ role: 'system', content: systemPrompt }, ...messages]
-        : messages,
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 2000 },
     }),
   });
 
@@ -52,7 +48,7 @@ async function callClaude(messages, systemPrompt) {
   }
 
   const data = await response.json();
-  return data.choices[0].message.content;
+  return data.candidates[0].content.parts[0].text;
 }
 
 // ============================
