@@ -445,8 +445,7 @@ Required JSON format:
 }`;
 
     const raw = await callClaude(
-      [{ role: 'user', content: '다음 재료로 만들 수 있는 한국어 레시피를 JSON으로 작성해주세요. 모든 내용은 반드시 한국어로 작성하세요.
-재료: ' + ingredients }],
+      [{ role: 'user', content: '다음 재료로 만들 수 있는 한국어 레시피를 JSON으로 작성해주세요. 모든 내용은 반드시 한국어로 작성하세요. 재료: ' + ingredients }],
       systemPrompt
     );
 
