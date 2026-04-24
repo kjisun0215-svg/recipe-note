@@ -36,6 +36,7 @@
     </nav>
     <div class="sidebar-footer">
       <div class="recipe-count" id="recipeCount">레시피 0개</div>
+      <button class="api-key-btn" onclick="openApiKeyModal()">🔑 API 키 설정</button>
     </div>
   </aside>
 
@@ -227,6 +228,23 @@
     <div class="modal" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal()">✕</button>
       <div class="modal-content" id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- API 키 입력 모달 -->
+  <div class="api-key-modal-overlay" id="apiKeyModal">
+    <div class="api-key-modal">
+      <div class="api-key-modal-header">
+        <div class="api-key-modal-title">🔑 Groq API 키 설정</div>
+        <button class="modal-close" onclick="closeApiKeyModal()">✕</button>
+      </div>
+      <p class="api-key-desc">AI 레시피 생성과 URL 가져오기에 필요해요.<br>키는 이 기기에만 저장되며 외부로 전송되지 않아요.</p>
+      <div class="api-key-steps">
+        <span>1. <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> 접속</span>
+        <span>2. Create API Key 클릭 후 키 복사</span>
+      </div>
+      <input id="apiKeyInput" class="form-input" placeholder="gsk_로 시작하는 키를 입력하세요" type="password">
+      <button class="btn-primary api-key-save-btn" onclick="saveApiKey()">✅ 저장하기</button>
     </div>
   </div>
 
