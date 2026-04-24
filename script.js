@@ -23,22 +23,30 @@ function saveToStorage() {
 }
 
 // ============================
-// AI API 호출 (OpenRouter - CORS 허용)
+// AI API 호출 (Groq - CORS 허용, 무료)
+// 키는 localStorage에 저장 - 코드에 노출 안 됨
 // ============================
-const OR_KEY = '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';
-const OR_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
+function getGroqKey() {
+  return localStorage.getItem('groq_api_key') || '';
+}
 
 async function callClaude(messages, systemPrompt) {
-  const response = await fetch(OR_URL, {
+  const key = getGroqKey();
+  if (!key) {
+    openApiKeyModal();
+    throw new Error('API 키를 입력해주세요');
+  }
+
+  const response = await fetch(GROQ_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + OR_KEY,
-      'HTTP-Referer': 'https://kjisun0215-svg.github.io/recipe-note/',
-      'X-Title': 'Recipe Note',
+      'Authorization': 'Bearer ' + key,
     },
     body: JSON.stringify({
-      model: 'meta-llama/llama-3.3-8b-instruct:free',
+      model: 'llama-3.3-70b-versatile',
       temperature: 0.7,
       max_tokens: 2000,
       messages: systemPrompt
@@ -49,11 +57,38 @@ async function callClaude(messages, systemPrompt) {
 
   if (!response.ok) {
     const err = await response.text();
+    // 401이면 키가 잘못된 것 - 다시 입력 유도
+    if (response.status === 401) {
+      localStorage.removeItem('groq_api_key');
+      openApiKeyModal();
+    }
     throw new Error('API 오류 (' + response.status + '): ' + err);
   }
 
   const data = await response.json();
   return data.choices[0].message.content;
+}
+
+// ============================
+// API 키 모달
+// ============================
+function openApiKeyModal() {
+  document.getElementById('apiKeyModal').classList.add('show');
+}
+
+function closeApiKeyModal() {
+  document.getElementById('apiKeyModal').classList.remove('show');
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key || !key.startsWith('gsk_')) {
+    showToast('⚠️ 올바른 Groq API 키를 입력해주세요 (gsk_로 시작)');
+    return;
+  }
+  localStorage.setItem('groq_api_key', key);
+  closeApiKeyModal();
+  showToast('✅ API 키가 저장됐어요!');
 }
 
 // ============================
