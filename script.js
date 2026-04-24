@@ -427,22 +427,26 @@ async function generateRecipe() {
   resultDiv.innerHTML = '<div class="loading-spinner"><div class="spinner purple"></div><p>AI가 레시피를 만들고 있어요...</p></div>';
 
   try {
-    const systemPrompt = `당신은 전문 요리사이자 레시피 작성 전문가입니다.
-사용자가 제공한 재료로 맛있고 실용적인 레시피를 만들어주세요.
-반드시 다음 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
+    const systemPrompt = `You are a Korean recipe expert. CRITICAL RULES:
+1. ALL text must be in Korean (한국어) only - no English, no other languages
+2. Respond ONLY with a valid JSON object, no other text before or after
+3. Do not include markdown code blocks or backticks
+
+Required JSON format:
 {
-  "title": "요리 이름",
-  "category": "한식 또는 양식 또는 디저트 또는 기타",
+  "title": "한국어 요리 이름",
+  "category": "한식 또는 양식 또는 디저트 또는 기타 중 하나",
   "time": "조리 시간 (예: 30분)",
-  "level": "쉬움 또는 보통 또는 어려움",
-  "tags": ["태그1", "태그2"],
-  "ingredients": ["재료1 (분량)", "재료2 (분량)"],
-  "steps": ["1단계 설명", "2단계 설명"],
-  "tip": "요리 팁이나 주의사항"
+  "level": "쉬움 또는 보통 또는 어려움 중 하나",
+  "tags": ["한국어태그1", "한국어태그2"],
+  "ingredients": ["재료1 적당량", "재료2 2개"],
+  "steps": ["첫 번째 단계 설명", "두 번째 단계 설명"],
+  "tip": "한국어로 된 요리 팁"
 }`;
 
     const raw = await callClaude(
-      [{ role: 'user', content: '재료: ' + ingredients + '\n위 재료를 활용해 만들 수 있는 레시피를 JSON 형식으로 알려주세요.' }],
+      [{ role: 'user', content: '다음 재료로 만들 수 있는 한국어 레시피를 JSON으로 작성해주세요. 모든 내용은 반드시 한국어로 작성하세요.
+재료: ' + ingredients }],
       systemPrompt
     );
 
@@ -578,20 +582,23 @@ async function importFromUrl() {
       }
     }
 
-    const systemPrompt = `당신은 요리 레시피를 추출하는 전문가입니다.
-주어진 URL 또는 페이지 내용에서 레시피를 추출해 JSON으로 정리해주세요.
-반드시 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
+    const systemPrompt = `You are a Korean recipe extraction expert. CRITICAL RULES:
+1. ALL text must be in Korean (한국어) only - no English, no other languages
+2. Respond ONLY with a valid JSON object, no other text before or after
+3. Do not include markdown code blocks or backticks
+4. If content is in another language, translate everything to Korean
+
+Required JSON format:
 {
-  "title": "요리 이름",
-  "category": "한식 또는 양식 또는 디저트 또는 기타",
-  "time": "조리 시간",
-  "level": "쉬움 또는 보통 또는 어려움",
-  "tags": ["태그1", "태그2"],
-  "ingredients": ["재료1 (분량)", "재료2 (분량)"],
-  "steps": ["1단계 설명", "2단계 설명"],
-  "tip": "요리 팁"
-}
-레시피를 찾기 어렵다면 URL을 분석해 합리적으로 추론해 주세요.`;
+  "title": "한국어 요리 이름",
+  "category": "한식 또는 양식 또는 디저트 또는 기타 중 하나",
+  "time": "조리 시간 (예: 30분)",
+  "level": "쉬움 또는 보통 또는 어려움 중 하나",
+  "tags": ["한국어태그1", "한국어태그2"],
+  "ingredients": ["재료1 적당량", "재료2 2개"],
+  "steps": ["첫 번째 단계 설명", "두 번째 단계 설명"],
+  "tip": "한국어로 된 요리 팁"
+}`;
 
     let userPrompt;
     if (isYoutube) {
