@@ -559,25 +559,40 @@ async function importFromUrl() {
     let fetchSuccess = false;
 
     if (!isYoutube) {
-      // 블로그/사이트: allorigins 프록시로 내용 가져오기
-      try {
-        const proxyRes = await fetch(
-          'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
-          { signal: AbortSignal.timeout(12000) }
-        );
-        if (proxyRes.ok) {
-          const proxyData = await proxyRes.json();
+      // 여러 프록시를 순서대로 시도
+      const proxies = [
+        u => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u),
+        u => 'https://corsproxy.io/?' + encodeURIComponent(u),
+        u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+      ];
+
+      for (const makeProxy of proxies) {
+        try {
+          const proxyRes = await fetch(makeProxy(url), { signal: AbortSignal.timeout(10000) });
+          if (!proxyRes.ok) continue;
+
+          let raw = '';
+          const ct = proxyRes.headers.get('content-type') || '';
+          if (ct.includes('application/json')) {
+            const json = await proxyRes.json();
+            raw = json.contents || json.body || '';
+          } else {
+            raw = await proxyRes.text();
+          }
+
+          if (!raw) continue;
+
           const parser = new DOMParser();
-          const doc = parser.parseFromString(proxyData.contents || '', 'text/html');
+          const doc = parser.parseFromString(raw, 'text/html');
           ['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe'].forEach(tag => {
             doc.querySelectorAll(tag).forEach(el => el.remove());
           });
           pageContent = (doc.body ? doc.body.innerText || doc.body.textContent : '') || '';
           pageContent = pageContent.replace(/\s+/g, ' ').trim().slice(0, 5000);
-          if (pageContent.length > 100) fetchSuccess = true;
+          if (pageContent.length > 100) { fetchSuccess = true; break; }
+        } catch (e) {
+          console.warn('프록시 실패:', e.message);
         }
-      } catch (e) {
-        console.warn('페이지 fetch 실패:', e.message);
       }
     }
 
