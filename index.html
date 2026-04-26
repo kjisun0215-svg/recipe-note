@@ -35,7 +35,7 @@
         <span class="nav-icon">🤖</span> AI 레시피
       </button>
       <button class="nav-item" data-tab="url" onclick="switchTab('url', this)">
-        <span class="nav-icon">🔗</span> URL 가져오기
+        <span class="nav-icon">📋</span> 레시피 가져오기
       </button>
       <button class="nav-item" data-tab="favorites" onclick="switchTab('favorites', this)">
         <span class="nav-icon">⭐</span> 즐겨찾기
@@ -188,28 +188,32 @@
         </div>
       </section>
 
-      <!-- URL 가져오기 탭 -->
+      <!-- 텍스트 가져오기 탭 -->
       <section class="tab-pane" id="tab-url">
         <div class="section-header">
-          <h2 class="section-title">🔗 URL로 레시피 가져오기</h2>
-          <p class="section-desc">유튜브 영상이나 블로그 링크를 붙여넣으면 AI가 레시피를 분석해드려요</p>
+          <h2 class="section-title">📋 레시피 가져오기</h2>
+          <p class="section-desc">블로그나 유튜브 설명란의 레시피를 복사해서 붙여넣으면 AI가 깔끔하게 정리해드려요</p>
         </div>
         <div class="url-card">
-          <div class="url-input-area">
-            <label class="form-label">레시피 URL</label>
-            <div class="url-input-row">
-              <input id="recipeUrl" class="form-input" placeholder="https://youtu.be/... 또는 블로그 URL" onkeydown="if(event.key==='Enter') importFromUrl()">
-              <button class="btn-url" onclick="importFromUrl()" id="urlBtn">
-                <span id="urlBtnText">📥 가져오기</span>
-              </button>
-            </div>
-            <div class="url-type-badges">
-              <span class="url-badge youtube">▶ 유튜브</span>
-              <span class="url-badge blog">📝 블로그</span>
-              <span class="url-badge site">🌐 요리 사이트</span>
-            </div>
+          <!-- 텍스트 붙여넣기 -->
+          <div class="form-group" style="margin-bottom:16px">
+            <label class="form-label">레시피 텍스트 붙여넣기</label>
+            <p class="url-hint" style="margin-top:4px;margin-bottom:10px">💡 네이버 블로그, 유튜브 설명란, 요리 사이트 등에서 레시피 내용을 복사해 붙여넣으세요</p>
+            <textarea id="recipeText" class="form-input form-textarea" style="height:200px"
+              placeholder="여기에 레시피 텍스트를 붙여넣으세요.&#10;&#10;예)&#10;[재료]&#10;딸기 200g, 바나나 1개, 요거트 150ml&#10;&#10;[만드는 법]&#10;1. 딸기를 깨끗이 씻어요&#10;2. 바나나를 잘라요..."></textarea>
           </div>
-          <div id="urlResult" class="url-result" style="display:none"></div>
+
+          <!-- 유튜브 링크 (선택) -->
+          <div class="form-group" style="margin-bottom:16px">
+            <label class="form-label">유튜브 링크 <span class="label-hint">선택 — 저장 후 영상으로 같이 볼 수 있어요</span></label>
+            <input id="recipeUrl" class="form-input" placeholder="https://youtu.be/... (선택사항)">
+          </div>
+
+          <button class="btn-url" style="width:100%" onclick="importFromText()" id="textBtn">
+            <span id="textBtnText">✨ AI로 레시피 정리하기</span>
+          </button>
+
+          <div id="urlResult" class="url-result" style="display:none;margin-top:20px"></div>
         </div>
       </section>
 
