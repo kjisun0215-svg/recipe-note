@@ -528,6 +528,100 @@ function saveAIRecipe() {
 }
 
 // ============================
+// 가져오기 탭 전환 (URL / 텍스트)
+// ============================
+function switchImportTab(mode) {
+  const urlArea  = document.getElementById('importUrlArea');
+  const textArea = document.getElementById('importTextArea');
+  const tabUrl   = document.getElementById('tabUrl');
+  const tabText  = document.getElementById('tabText');
+  const result   = document.getElementById('urlResult');
+
+  result.style.display = 'none';
+
+  if (mode === 'url') {
+    urlArea.style.display  = 'block';
+    textArea.style.display = 'none';
+    tabUrl.classList.add('active');
+    tabText.classList.remove('active');
+  } else {
+    urlArea.style.display  = 'none';
+    textArea.style.display = 'block';
+    tabUrl.classList.remove('active');
+    tabText.classList.add('active');
+  }
+}
+
+// ============================
+// 텍스트에서 레시피 추출
+// ============================
+async function importFromText() {
+  const text = document.getElementById('recipeText').value.trim();
+  if (!text) {
+    showToast('⚠️ 레시피 텍스트를 붙여넣어 주세요');
+    document.getElementById('recipeText').focus();
+    return;
+  }
+
+  const btn     = document.getElementById('textBtn');
+  const resultDiv = document.getElementById('urlResult');
+
+  btn.disabled = true;
+  document.getElementById('textBtnText').textContent = '⏳ 분석 중...';
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<div class="loading-spinner"><div class="spinner green"></div><p>AI가 레시피를 정리하고 있어요...</p></div>';
+
+  try {
+    const systemPrompt = `You are a Korean recipe extraction expert. CRITICAL RULES:
+1. ALL text must be in Korean (한국어) only - no English, no other languages
+2. Respond ONLY with a valid JSON object, no other text before or after
+3. Do not include markdown code blocks or backticks
+4. Extract recipe information EXACTLY as written in the source text - do not invent or hallucinate ingredients or steps
+5. If content is in another language, translate everything to Korean
+
+Required JSON format:
+{
+  "title": "한국어 요리 이름",
+  "category": "한식 또는 양식 또는 디저트 또는 기타 중 하나",
+  "time": "조리 시간 (예: 30분)",
+  "level": "쉬움 또는 보통 또는 어려움 중 하나",
+  "tags": ["한국어태그1", "한국어태그2"],
+  "ingredients": ["재료1 적당량", "재료2 2개"],
+  "steps": ["첫 번째 단계 설명", "두 번째 단계 설명"],
+  "tip": "한국어로 된 요리 팁"
+}`;
+
+    const userPrompt = '다음 텍스트에서 레시피를 추출해 JSON으로 정리해주세요. 텍스트에 있는 재료와 순서를 그대로 사용하세요: ' + text.slice(0, 6000);
+
+    const raw = await callClaude([{ role: 'user', content: userPrompt }], systemPrompt);
+
+    let data;
+    try {
+      const clean = raw.replace(/```json|```/g, '').trim();
+      data = JSON.parse(clean);
+    } catch (e) {
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (jsonMatch) data = JSON.parse(jsonMatch[0]);
+      else throw new Error('응답 파싱 실패');
+    }
+
+    const ytUrl = document.getElementById('recipeUrl') ? document.getElementById('recipeUrl').value.trim() : '';
+    data.sourceUrl = ytUrl || null;
+    data.isYoutube = ytUrl ? isYoutubeUrl(ytUrl) : false;
+    data.youtubeId = data.isYoutube ? getYoutubeId(ytUrl) : null;
+    tempUrlRecipe = data;
+    renderUrlResult(data, resultDiv, true);
+
+  } catch (err) {
+    console.error('텍스트 임포트 오류:', err);
+    resultDiv.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-500)"><div style="font-size:40px;margin-bottom:12px">😓</div><p style="font-weight:600;margin-bottom:6px">레시피 추출에 실패했어요</p><small style="color:var(--gray-400)">' + err.message + '</small></div>';
+  } finally {
+    btn.disabled = false;
+    document.getElementById('textBtnText').textContent = '✨ AI로 레시피 정리하기';
+  }
+}
+
+// ============================
 // URL에서 레시피 가져오기
 // ============================
 async function importFromUrl() {
